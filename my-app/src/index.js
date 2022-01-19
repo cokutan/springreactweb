@@ -66,6 +66,7 @@ class Game extends React.Component {
 									pointy: null}],
 		xIsNext:true,
 		stepNumber : 0,
+		moves: [],
 		};
 	}
 	
@@ -76,13 +77,30 @@ class Game extends React.Component {
 	if(calculateWinner(squares) || squares[i]) {return;}
 	squares[i] = this.state.xIsNext?  "X" : "O";
 	
+	const active = { fontWeight : 'bold'};
+	const inactive = {fontWeight : 'normal'};
+	const moves = history.map((step, move)=> {
+		const desc = move ? "Go to move #"+ move + " (" + step.pointx + "," +step.pointy + ")": "Go to game start";
+		return (
+			
+<li key={move}>
+	<a href='#' style = {this.state.stepNumber===move ? active: inactive}  onClick={()=>this.jumpTo(move,desc)}>{desc}</a>
+</li>
+		) ;
+	});
+	
 	this.setState({	history: history.concat( [{squares : squares, pointx :  i%3 +1,
 					pointy :  Math.floor(i/3) + 1}]), 
 					xIsNext : !this.state.xIsNext,
 					stepNumber : history.length,
+					moves : moves,
 					});
 }
 
+	handleToggle () {
+		this.setState ( {moves: this.state.moves.reverse()});
+	}
+	
    jumpTo(step, desc) {
 	this.setState({
 		stepNumber : step,
@@ -95,17 +113,7 @@ class Game extends React.Component {
 	const history = this.state.history;
 	const current = history[this.state.stepNumber];
 	const winner = calculateWinner(current.squares);
-	const active = { fontWeight : 'bold'};
-	const inactive = {fontWeight : 'normal'};
-	const moves = history.map((step, move)=> {
-		const desc = move ? "Go to move #"+ move + " (" + step.pointx + "," +step.pointy + ")": "Go to game start";
-		return (
-			
-<li key={move}>
-	<a href='#' style = {this.state.stepNumber===move ? active: inactive}  onClick={()=>this.jumpTo(move,desc)}>{desc}</a>
-</li>
-		) ;
-	});
+	
 	let status;
 	if(winner) {
 		status = "Winner is " + winner;
@@ -121,7 +129,8 @@ class Game extends React.Component {
 	</div>
 	<div className="game-info">
 		<div>{status}</div>
-		<ol>{moves}</ol>
+		<ol>{this.state.moves}</ol>
+		<button onClick = {()=>this.handleToggle()}>Toggle</button>
 	</div>
 </div>
     );
